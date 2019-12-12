@@ -174,7 +174,7 @@ def print_objects(boxes, class_names):
             print('%i. %s: %f' % (i + 1, class_names[cls_id], cls_conf))
 
             
-def plot_boxes(img, boxes, class_names, plot_labels, color = None):
+def plot_boxes(img_shape, boxes, class_names, plot_labels, color = None):
     
     # Define a tensor used to set the colors of the bounding boxes
     colors = torch.FloatTensor([[1,0,1],[0,0,1],[0,1,1],[0,1,0],[1,1,0],[1,0,0]])
@@ -191,13 +191,9 @@ def plot_boxes(img, boxes, class_names, plot_labels, color = None):
         return int(r * 255)
     
     # Get the width and height of the image
-    width = img.shape[1]
-    height = img.shape[0]
-    
-    # Create a figure and plot the image
-    fig, a = plt.subplots(1,1)
-    a.imshow(img)
-    
+    width = img_shape[1]
+    height = img_shape[0]
+
     # Plot the bounding boxes and corresponding labels on top of the image
     for i in range(len(boxes)):
         
@@ -252,11 +248,12 @@ def plot_boxes(img, boxes, class_names, plot_labels, color = None):
             conf_tx = class_names[cls_id] + ': {%.2f}'%(cls_conf)
             
             # Define x and y offsets for the labels
-            lxc = (img.shape[1] * 0.266) / 100
-            lyc = (img.shape[0] * 1.180) / 100
+            lxc = (img_shape[1] * 0.266) / 100
+            lyc = (img_shape[0] * 1.180) / 100
             
             # Draw the labels on top of the image
             a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 10, color = 'k',
+
                    bbox = dict(facecolor = rgb, edgecolor = rgb, alpha = 0.8))        
         
     plt.show()
