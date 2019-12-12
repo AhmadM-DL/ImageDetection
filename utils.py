@@ -256,7 +256,7 @@ def plot_boxes(img, boxes, class_names, plot_labels, color = None):
             lyc = (img.shape[0] * 1.180) / 100
             
             # Draw the labels on top of the image
-            a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 24, color = 'k',
+            a.text(x1 + lxc, y1 - lyc, conf_tx, fontsize = 10, color = 'k',
                    bbox = dict(facecolor = rgb, edgecolor = rgb, alpha = 0.8))        
         
     plt.show()
