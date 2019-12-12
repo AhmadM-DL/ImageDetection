@@ -98,7 +98,7 @@ def nms(boxes, iou_thresh):
     return best_boxes
 
 
-def detect_objects(model, img, iou_thresh, nms_thresh):
+def detect_objects(model, img, iou_thresh, nms_thresh, verbose=False):
     
     # Start the time. This is done to calculate how long the detection takes.
     start = time.time()
@@ -130,10 +130,12 @@ def detect_objects(model, img, iou_thresh, nms_thresh):
     finish = time.time()
     
     # Print the time it took to detect objects
-    print('\n\nIt took {:.3f}'.format(finish - start), 'seconds to detect the objects in the image.\n')
+    if verbose:
+        print('\n\nIt took {:.3f}'.format(finish - start), 'seconds to detect the objects in the image.\n')
     
     # Print the number of objects detected
-    print('Number of Objects Detected:', len(boxes), '\n')
+    if verbose:
+        print('Number of Objects Detected:', len(boxes), '\n')
     
     return boxes
 
