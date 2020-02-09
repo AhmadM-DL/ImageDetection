@@ -335,14 +335,14 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
 
     for i in range(len(objects_bboxes)):
 
-        if only_classes and not class_names[cls_id] in only_classes:
-            continue
-
         # Get the ith bounding box
         box = objects_bboxes[i]
 
         cls_id = box[6]
         cls_conf = box[5]
+
+        if only_classes and not class_names[cls_id] in only_classes:
+            continue
 
         # Get the (x,y) pixel coordinates of the lower-left and lower-right corners
         # of the bounding box relative to the size of the image.
