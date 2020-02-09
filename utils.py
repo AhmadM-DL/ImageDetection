@@ -320,7 +320,7 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, background_color=(255,
     cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=text_color, thickness=1)
 
 
-def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, only_classes=None, plot_labels=True, plot_class_confidence=False,):
+def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, only_classes=None, plot_labels=True, plot_class_confidence=False, text_color=(0,0,0)):
     """
     This function plots detected objects bounding boxes over images with class name and accuracy
     :param original_frame: A Frame(Image) from video
@@ -370,10 +370,10 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
             lyc = (masked_frame.shape[0] * 1.180) / 100
 
             # Plot class name
-            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1)-1, background_color=(b, g, r))
+            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1)-1, background_color=(b, g, r), text_color=text_color)
 
         if plot_class_confidence:
             # Plot probability
-            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r))
+            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r), text_color=text_color)
 
     return masked_frame
