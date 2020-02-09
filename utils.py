@@ -296,7 +296,7 @@ def get_color(c, x, max_val):
     return int(r * 255)
 
 
-def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bkgr=(255, 255, 255), txt_color=(255,255,255)):
+def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bkgr=(255, 255, 255), txt_color=(255, 255, 255)):
     """
     A Function to write text on an image using openCV
     :param img: The image to write text on it
@@ -365,9 +365,9 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plo
             # cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
 
             # Plot class name
-            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), rectangle_bgr=(b, g, r))
+            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), rectangle_bkgr=(b, g, r))
 
             # Plot probability
-            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), rectangle_bgr=(b, g, r))
+            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), rectangle_bkgr=(b, g, r))
 
     return masked_frame
