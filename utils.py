@@ -107,7 +107,7 @@ def nms(boxes, iou_thresh):
     return best_boxes
 
 
-def detect_objects(model, img, iou_thresh, nms_thresh, verbose=False):
+def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False):
     # Start the time. This is done to calculate how long the detection takes.
     start = time.time()
 
@@ -119,6 +119,8 @@ def detect_objects(model, img, iou_thresh, nms_thresh, verbose=False):
     # Normalized to values between 0 and 1, and finally unsqueezed to have the correct
     # shape of 1 x 3 x 416 x 416
     img = torch.from_numpy(img.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
+
+    img.to(device)
 
     # Feed the image to the neural network with the corresponding NMS threshold.
     # The first step in NMS is to remove all bounding boxes that have a very low
