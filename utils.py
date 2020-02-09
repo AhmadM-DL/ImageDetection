@@ -308,7 +308,7 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, background_color=(255,
     :param text_color: The text color
     :return: Nothing
     """
-    font_scale = 0.3
+    font_scale = 0.35
     font = cv2.FONT_HERSHEY_SIMPLEX
 
     # get the width and height of the text box
@@ -320,18 +320,23 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, background_color=(255,
     cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=text_color, thickness=1)
 
 
-def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plot_labels=True):
+def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, only_classes=None, plot_labels=True, plot_class_confidence=False,):
     """
     This function plots detected objects bounding boxes over images with class name and accuracy
     :param original_frame: A Frame(Image) from video
     :param objects_bboxes: Detected Objects Bounding boxes (output of yolo object detection model) and their class
     :param class_names: Array of class names
+    :param only_classes: A list of class names to consider, if none consider all
     :param plot_labels: Whether to write down class label over bounding boxes or not
+    :param plot_class_confidence: Whether to write down class confidence over bounding boxes or not
     :return: Masked Frame
     """
     masked_frame = copy.copy(original_frame)
 
     for i in range(len(objects_bboxes)):
+
+        if only_classes and not class_names[cls_id] in only_classes:
+            continue
 
         # Get the ith bounding box
         box = objects_bboxes[i]
@@ -363,11 +368,11 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plo
             # Define x and y offsets for the labels
             lxc = (masked_frame.shape[1] * 0.266) / 100
             lyc = (masked_frame.shape[0] * 1.180) / 100
-            ## cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
 
             # Plot class name
-            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), background_color=(b, g, r))
+            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1)-1, background_color=(b, g, r))
 
+        if plot_class_confidence:
             # Plot probability
             cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r))
 
