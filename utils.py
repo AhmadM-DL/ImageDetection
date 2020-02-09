@@ -353,15 +353,17 @@ def boxtocv(frame, boxes, class_names, plot_labels=True):
         g = get_color(1, offset, classes)
         b = get_color(0, offset, classes)
 
-        cv2.rectangle(frame, (x1, y2), (x1 + width_x, y2 + width_y), (g, r), 2)
+        cv2.rectangle(frame, (x1, y2), (x1 + width_x, y2 + width_y), (b, g, r), 2)
 
         if plot_labels:
             # Define x and y offsets for the labels
             lxc = (frame.shape[1] * 0.266) / 100
             lyc = (frame.shape[0] * 1.180) / 100
             # cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
+
             # Plot class name
             cv2_put_text(frame, class_names[cls_id], int(x1), int(y1), rectangle_bgr=(b, g, r))
+
             # Plot probability
             cv2_put_text(frame, "{0:.2f}".format(cls_conf), int(x2), int(y2), rectangle_bgr=(b, g, r))
 
