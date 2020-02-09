@@ -296,14 +296,15 @@ def get_color(c, x, max_val):
     return int(r * 255)
 
 
-def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bgr=(255, 255, 255)):
+def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bkgr=(255, 255, 255), txt_color=(255,255,255)):
     """
     A Function to write text on an image using openCV
     :param img: The image to write text on it
     :param text: The text to be written
     :param text_offset_x: The text bbox upper left point abscissa
     :param text_offset_y: The text bbox upper left point ordinate
-    :param rectangle_bgr: The text bbox background color
+    :param rectangle_bkgr: The text bbox background color
+    :param txt_color: The text color
     :return: Nothing
     """
     font_scale = 0.3
@@ -314,33 +315,35 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bgr=(255, 25
 
     # make the coords of the box with a small padding of two pixels
     box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y - text_height - 2))
-    cv2.rectangle(img, box_coords[0], box_coords[1], rectangle_bgr, cv2.FILLED)
-    cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=(0, 0, 0), thickness=1)
+    cv2.rectangle(img, box_coords[0], box_coords[1], rectangle_bkgr, cv2.FILLED)
+    cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=txt_color, thickness=1)
 
 
-def boxtocv(frame, boxes, class_names, plot_labels=True):
+def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plot_labels=True):
     """
     This function plots detected objects bounding boxes over images with class name and accuracy
-    :param frame: A Frame(Image) from video
-    :param boxes: Detected Objects Bounding boxes (output of yolo object detection model) and their class
+    :param original_frame: A Frame(Image) from video
+    :param objects_bboxes: Detected Objects Bounding boxes (output of yolo object detection model) and their class
     :param class_names: Array of class names
     :param plot_labels: Whether to write down class label over bounding boxes or not
     :return: Masked Frame
     """
-    for i in range(len(boxes)):
+    masked_frame = original_frame
+
+    for i in range(len(objects_bboxes)):
 
         # Get the ith bounding box
-        box = boxes[i]
+        box = objects_bboxes[i]
 
         cls_id = box[6]
         cls_conf = box[5]
 
         # Get the (x,y) pixel coordinates of the lower-left and lower-right corners
         # of the bounding box relative to the size of the image.
-        x1 = int(np.around((box[0] - box[2] / 2.0) * frame.shape[1]))
-        y1 = int(np.around((box[1] - box[3] / 2.0) * frame.shape[0]))
-        x2 = int(np.around((box[0] + box[2] / 2.0) * frame.shape[1]))
-        y2 = int(np.around((box[1] + box[3] / 2.0) * frame.shape[0]))
+        x1 = int(np.around((box[0] - box[2] / 2.0) * masked_frame.shape[1]))
+        y1 = int(np.around((box[1] - box[3] / 2.0) * masked_frame.shape[0]))
+        x2 = int(np.around((box[0] + box[2] / 2.0) * masked_frame.shape[1]))
+        y2 = int(np.around((box[1] + box[3] / 2.0) * masked_frame.shape[0]))
 
         # Calculate the width and height of the bounding box relative to the size of the image.
         width_x = x2 - x1
@@ -353,18 +356,18 @@ def boxtocv(frame, boxes, class_names, plot_labels=True):
         g = get_color(1, offset, classes)
         b = get_color(0, offset, classes)
 
-        cv2.rectangle(frame, (x1, y2), (x1 + width_x, y2 + width_y), (b, g, r), 2)
+        cv2.rectangle(masked_frame, (x1, y2), (x1 + width_x, y2 + width_y), (b, g, r), 1)
 
         if plot_labels:
             # Define x and y offsets for the labels
-            lxc = (frame.shape[1] * 0.266) / 100
-            lyc = (frame.shape[0] * 1.180) / 100
+            lxc = (masked_frame.shape[1] * 0.266) / 100
+            lyc = (masked_frame.shape[0] * 1.180) / 100
             # cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
 
             # Plot class name
-            cv2_put_text(frame, class_names[cls_id], int(x1), int(y1), rectangle_bgr=(b, g, r))
+            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), rectangle_bgr=(b, g, r))
 
             # Plot probability
-            cv2_put_text(frame, "{0:.2f}".format(cls_conf), int(x2), int(y2), rectangle_bgr=(b, g, r))
+            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), rectangle_bgr=(b, g, r))
 
-    return frame
+    return masked_frame
