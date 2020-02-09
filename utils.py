@@ -296,15 +296,15 @@ def get_color(c, x, max_val):
     return int(r * 255)
 
 
-def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bkgr=(255, 255, 255), txt_color=(255, 255, 255)):
+def cv2_put_text(img, text, text_offset_x, text_offset_y, background_color=(255, 255, 255), text_color=(255, 255, 255)):
     """
     A Function to write text on an image using openCV
     :param img: The image to write text on it
     :param text: The text to be written
     :param text_offset_x: The text bbox upper left point abscissa
     :param text_offset_y: The text bbox upper left point ordinate
-    :param rectangle_bkgr: The text bbox background color
-    :param txt_color: The text color
+    :param background_color: The text bbox background color
+    :param text_color: The text color
     :return: Nothing
     """
     font_scale = 0.3
@@ -315,8 +315,8 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, rectangle_bkgr=(255, 2
 
     # make the coords of the box with a small padding of two pixels
     box_coords = ((text_offset_x, text_offset_y), (text_offset_x + text_width + 2, text_offset_y - text_height - 2))
-    cv2.rectangle(img, box_coords[0], box_coords[1], rectangle_bkgr, cv2.FILLED)
-    cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=txt_color, thickness=1)
+    cv2.rectangle(img, box_coords[0], box_coords[1], background_color, cv2.FILLED)
+    cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=text_color, thickness=1)
 
 
 def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plot_labels=True):
@@ -362,12 +362,12 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plo
             # Define x and y offsets for the labels
             lxc = (masked_frame.shape[1] * 0.266) / 100
             lyc = (masked_frame.shape[0] * 1.180) / 100
-            # cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
+            ## cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
 
             # Plot class name
-            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), rectangle_bkgr=(b, g, r))
+            cv2_put_text(masked_frame, class_names[cls_id], int(x1), int(y1), background_color=(b, g, r))
 
             # Plot probability
-            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), rectangle_bkgr=(b, g, r))
+            cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r))
 
     return masked_frame
