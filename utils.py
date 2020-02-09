@@ -322,13 +322,14 @@ def cv2_put_text(img, text, text_offset_x, text_offset_y, background_color=(255,
     cv2.putText(img, text, (text_offset_x, text_offset_y), font, fontScale=font_scale, color=text_color, thickness=1)
 
 
-def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, only_classes=None, plot_labels=True, plot_class_confidence=False, text_color=(0,0,0)):
+def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, only_classes=None, confidence_threshold= 0.6, plot_labels=True, plot_class_confidence=False, text_color=(0,0,0)):
     """
     This function plots detected objects bounding boxes over images with class name and accuracy
     :param original_frame: A Frame(Image) from video
     :param objects_bboxes: Detected Objects Bounding boxes (output of yolo object detection model) and their class
     :param class_names: Array of class names
     :param only_classes: A list of class names to consider, if none consider all
+    :param confidence_threshold:
     :param plot_labels: Whether to write down class label over bounding boxes or not
     :param plot_class_confidence: Whether to write down class confidence over bounding boxes or not
     :return: Masked Frame
@@ -344,6 +345,9 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
         cls_conf = box[5]
 
         if only_classes and not class_names[cls_id] in only_classes:
+            continue
+
+        if cls_conf<confidence_threshold:
             continue
 
         # Get the (x,y) pixel coordinates of the lower-left and lower-right corners
