@@ -179,6 +179,7 @@ def print_objects(boxes, class_names):
 
 
 def plot_boxes(img_shape, img_axis, boxes, class_names, plot_labels, color=None):
+
     # Define a tensor used to set the colors of the bounding boxes
     colors = torch.FloatTensor([[1, 0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 0], [1, 1, 0], [1, 0, 0]])
 
@@ -324,7 +325,7 @@ def boxtocv(frame, boxes, class_names, plot_labels=True):
     :param boxes: Detected Objects Bounding boxes (output of yolo object detection model) and their class
     :param class_names: Array of class names
     :param plot_labels: Whether to write down class label over bounding boxes or not
-    :return: Nothing
+    :return: Masked Frame
     """
     for i in range(len(boxes)):
 
@@ -355,13 +356,13 @@ def boxtocv(frame, boxes, class_names, plot_labels=True):
         cv2.rectangle(frame, (x1, y2), (x1 + width_x, y2 + width_y), (g, r), 2)
 
         if plot_labels:
-            # Create a string with the object class name and the corresponding object class probability
-            conf_tx = class_names[cls_id] + ': {:.1f}'.format(cls_conf)
-
             # Define x and y offsets for the labels
             lxc = (frame.shape[1] * 0.266) / 100
             lyc = (frame.shape[0] * 1.180) / 100
-
-            cv2_put_text(frame, conf_tx, int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
+            # cv2_put_text(frame, class_names[cls_id], int(x1 + lxc), int(y1 - lyc), rectangle_bgr=(b, g, r))
+            # Plot class name
+            cv2_put_text(frame, class_names[cls_id], int(x1), int(y1), rectangle_bgr=(b, g, r))
+            # Plot probability
+            cv2_put_text(frame, "{0:.2f}".format(cls_conf), int(x2), int(y2), rectangle_bgr=(b, g, r))
 
     return frame
