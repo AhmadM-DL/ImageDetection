@@ -107,10 +107,7 @@ def nms(boxes, iou_thresh):
     return best_boxes
 
 
-def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False):
-    # Start the time. This is done to calculate how long the detection takes.
-    start = time.time()
-
+def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False, return_time=False):
     # Set the model to evaluation mode.
     model.eval()
 
@@ -118,6 +115,7 @@ def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False):
     # The image is transposed, then converted to a FloatTensor of dtype float32, then
     # Normalized to values between 0 and 1, and finally unsqueezed to have the correct
     # shape of 1 x 3 x 416 x 416
+    start = time.time()
     img = torch.from_numpy(img.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
 
     img = img.to(device)
@@ -130,23 +128,26 @@ def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False):
 
     # Make a new list with all the bounding boxes returned by the neural network
     boxes = list_boxes[0][0] + list_boxes[1][0] + list_boxes[2][0]
+    detection_time = time.time() - start
 
     # Perform the second step of NMS on the bounding boxes returned by the neural network.
     # In this step, we only keep the best bounding boxes by eliminating all the bounding boxes
     # whose IOU value is higher than the given IOU threshold
+    start = time.time()
     boxes = nms(boxes, iou_thresh)
+    suppression_time = time.time() - start
 
-    # Stop the time. 
-    finish = time.time()
 
     # Print the time it took to detect objects
     if verbose:
-        print('\n\nIt took {:.3f}'.format(finish - start), 'seconds to detect the objects in the image.\n')
+        print('\n\nIt took {:.3f}'.format(detection_time + suppression_time), 'seconds to detect the objects in the image.\n')
 
     # Print the number of objects detected
     if verbose:
         print('Number of Objects Detected:', len(boxes), '\n')
 
+    if return_time:
+        return boxes, detection_time, suppression_time
     return boxes
 
 
