@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import cv2
+import copy
 import urllib
 import time
 from google.colab.patches import cv2_imshow
@@ -328,7 +329,7 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, plo
     :param plot_labels: Whether to write down class label over bounding boxes or not
     :return: Masked Frame
     """
-    masked_frame = original_frame
+    masked_frame = copy.copy(original_frame)
 
     for i in range(len(objects_bboxes)):
 
