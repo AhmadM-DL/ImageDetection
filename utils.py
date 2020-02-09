@@ -120,7 +120,7 @@ def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False):
     # shape of 1 x 3 x 416 x 416
     img = torch.from_numpy(img.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
 
-    img.to(device)
+    img = img.to(device)
 
     # Feed the image to the neural network with the corresponding NMS threshold.
     # The first step in NMS is to remove all bounding boxes that have a very low
