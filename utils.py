@@ -397,12 +397,12 @@ def generate_yolo_train_test_files(images_dir, output_dir, n_classes, train_vali
     f_train = open(train_output, "w")
     for image_name in train:
         f_train.write(images_dir+"/"+image_name+"\n")
-        f_train.close()
+    f_train.close()
 
     f_valid = open(valid_output, "w")
     for image_name in valid:
         f_valid.write(images_dir+"/"+image_name+"\n")
-        f_train.close()
+    f_train.close()
 
     os.makedirs(backup_path)
 
