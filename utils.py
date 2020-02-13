@@ -1,12 +1,10 @@
 import time
 import torch
+import re, os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import cv2
-import copy
-import urllib
-import time
+import cv2, copy, urllib, time
 from google.colab.patches import cv2_imshow
 from io import StringIO
 from io import BytesIO
@@ -384,3 +382,34 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
             cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r), text_color=text_color)
 
     return masked_frame
+
+def generate_yolo_train_test_files(images_dir, output_dir, n_classes, train_valid_split=0.8):
+    train_output = output_dir+"/train.txt"
+    valid_output = output_dir+"/valid.txt"
+    data_output = output_dir+"/obj.data"
+    names_path = output_dir+"/obj.names"
+    backup_path = output_dir+"/backup"
+
+    images = [ f for f in os.listdir(images_dir) if re.match(".*.jpg$",f)]
+    train = np.random.choice(images, size=int(len(images)*train_valid_split) )
+    valid = set(images) - set(train)
+
+    f_train = open(train_output, "w")
+    for image_name in train:
+        f_train.write(images_dir+"/"+image_name+"\n")
+        f_train.close()
+
+    f_valid = open(valid_output, "w")
+    for image_name in valid:
+        f_valid.write(images_dir+"/"+image_name+"\n")
+        f_train.close()
+
+    os.makedirs(backup_path)
+
+    f_data = open(data_output, "w")
+    f_data.write("classes="+str(n_classes)+"\n")
+    f_data.write("train="+train_output+"\n")
+    f_data.write("valid="+valid_output+"\n")
+    f_data.write("names="+names_path+"\n")
+    f_data.write("backup="+backup_path+"\n")
+    f_data.close()
