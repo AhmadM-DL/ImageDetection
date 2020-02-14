@@ -1,6 +1,9 @@
 import torch
 import torch.nn as nn
 import numpy as np
+import os
+import utils
+from datasets import ListDataset
 
 
 class YoloLayer(nn.Module):
@@ -450,3 +453,139 @@ def load_conv_bn(buf, start, conv_model, bn_model):
     bn_model.running_var.copy_(torch.from_numpy(buf[start:start+num_b]));   start = start + num_b
     conv_model.weight.data.copy_(torch.from_numpy(buf[start:start+num_w]).view_as(conv_model.weight.data)); start = start + num_w
     return start
+
+
+# def compute_loss(output, target):
+#
+#     if x.is_cuda:
+#         self.mse_loss = self.mse_loss.cuda()
+#         self.bce_loss = self.bce_loss.cuda()
+#         self.ce_loss = self.ce_loss.cuda()
+#
+#     nGT, nCorrect, mask, conf_mask, tx, ty, tw, th, tconf, tcls = build_targets(
+#         pred_boxes=pred_boxes.cpu().data,
+#         pred_conf=pred_conf.cpu().data,
+#         pred_cls=pred_cls.cpu().data,
+#         target=targets.cpu().data,
+#         anchors=scaled_anchors.cpu().data,
+#         num_anchors=nA,
+#         num_classes=self.num_classes,
+#         grid_size=nG,
+#         ignore_thres=self.ignore_thres,
+#         img_dim=self.image_dim,
+#     )
+#
+#     nProposals = int((pred_conf > 0.5).sum().item())
+#     recall = float(nCorrect / nGT) if nGT else 1
+#     precision = 0
+#     if nProposals > 0:
+#         precision = float(nCorrect / nProposals)
+#
+#     # Handle masks
+#     mask = Variable(mask.type(ByteTensor))
+#     conf_mask = Variable(conf_mask.type(ByteTensor))
+#
+#     # Handle target variables
+#     tx = Variable(tx.type(FloatTensor), requires_grad=False)
+#     ty = Variable(ty.type(FloatTensor), requires_grad=False)
+#     tw = Variable(tw.type(FloatTensor), requires_grad=False)
+#     th = Variable(th.type(FloatTensor), requires_grad=False)
+#     tconf = Variable(tconf.type(FloatTensor), requires_grad=False)
+#     tcls = Variable(tcls.type(LongTensor), requires_grad=False)
+#
+#     # Get conf mask where gt and where there is no gt
+#     conf_mask_true = mask
+#     conf_mask_false = conf_mask - mask
+#
+#     # Mask outputs to ignore non-existing objects
+#     loss_x = self.mse_loss(x[mask], tx[mask])
+#     loss_y = self.mse_loss(y[mask], ty[mask])
+#     loss_w = self.mse_loss(w[mask], tw[mask])
+#     loss_h = self.mse_loss(h[mask], th[mask])
+#     loss_conf = self.bce_loss(pred_conf[conf_mask_false], tconf[conf_mask_false]) + self.bce_loss(
+#         pred_conf[conf_mask_true], tconf[conf_mask_true]
+#     )
+#     loss_cls = (1 / nB) * self.ce_loss(pred_cls[mask], torch.argmax(tcls[mask], 1))
+#     loss = loss_x + loss_y + loss_w + loss_h + loss_conf + loss_cls
+#
+#     return (
+#         loss,
+#         loss_x.item(),
+#         loss_y.item(),
+#         loss_w.item(),
+#         loss_h.item(),
+#         loss_conf.item(),
+#         loss_cls.item(),
+#         recall,
+#         precision,
+#     )
+
+def train( image_folder, model_config_path, data_config_path, weights_path, classes_path, checkpoint_dir, device,
+           batch_size =16, n_epochs=20, conf_thres=0.8, nms_thres=0.4, n_cpu=0, img_size=416, checkpoint_interval=1):
+
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
+    classes = utils.load_classes(classes_path)
+
+    # Get data configuration
+    data_config = utils.parse_data_config(data_config_path)
+    train_path = data_config["train"]
+
+    # Get hyper parameters
+    hyperparams = utils.parse_model_config(model_config_path)[0]
+
+    learning_rate = float(hyperparams["learning_rate"])
+    momentum = float(hyperparams["momentum"])
+    decay = float(hyperparams["decay"])
+    burn_in = int(hyperparams["burn_in"])
+
+    # Initiate model
+    model = Darknet(model_config_path)
+    model.load_weights(weights_path)
+
+    model = model.to(device)
+
+    model.train()
+
+    # Get dataloader
+    dataloader = torch.utils.data.DataLoader(ListDataset(train_path), batch_size=batch_size,
+                                             shuffle=False, num_workers=n_cpu)
+
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
+
+    for epoch in range(n_epochs):
+        for batch_i, (_, imgs, targets) in enumerate(dataloader):
+
+            imgs = imgs.to(device)
+            targets = targets.to(device)
+
+            optimizer.zero_grad()
+
+            loss = model(imgs, targets)
+
+            loss.backward()
+            optimizer.step()
+
+            print(
+                "[Epoch %d/%d, Batch %d/%d] [Losses: x %f, y %f, w %f, h %f, conf %f, cls %f, total %f, recall: %.5f, precision: %.5f]"
+                % (
+                    epoch,
+                    n_epochs,
+                    batch_i,
+                    len(dataloader),
+                    model.losses["x"],
+                    model.losses["y"],
+                    model.losses["w"],
+                    model.losses["h"],
+                    model.losses["conf"],
+                    model.losses["cls"],
+                    loss.item(),
+                    model.losses["recall"],
+                    model.losses["precision"],
+                )
+            )
+
+            model.seen += imgs.size(0)
+
+        if epoch % opt.checkpoint_interval == 0:
+            model.save_weights("%s/%d.weights" % (opt.checkpoint_dir, epoch))

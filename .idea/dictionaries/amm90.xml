@@ -4,6 +4,8 @@
       <w>bboxes</w>
       <w>boxtocv</w>
       <w>coords</w>
+      <w>cuda</w>
+      <w>dataloader</w>
     </words>
   </dictionary>
 </component>
