@@ -383,33 +383,43 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
 
     return masked_frame
 
-def generate_yolo_train_test_files(images_dir, output_dir, n_classes, train_valid_split=0.8):
+
+def generate_yolo_train_test_files(images_dir, output_dir, classes, train_valid_split=0.8):
     train_output = output_dir+"/train.txt"
     valid_output = output_dir+"/valid.txt"
     data_output = output_dir+"/obj.data"
-    names_path = output_dir+"/obj.names"
+    names_output = output_dir+"/obj.names"
     backup_path = output_dir+"/backup"
 
     images = [ f for f in os.listdir(images_dir) if re.match(".*.jpg$",f)]
     train = np.random.choice(images, size=int(len(images)*train_valid_split) )
     valid = set(images) - set(train)
 
+    # Write train.txt
     f_train = open(train_output, "w")
     for image_name in train:
         f_train.write(images_dir+"/"+image_name+"\n")
     f_train.close()
 
+    # Write valid.txt
     f_valid = open(valid_output, "w")
     for image_name in valid:
         f_valid.write(images_dir+"/"+image_name+"\n")
     f_train.close()
 
+    # create backup
     os.makedirs(backup_path)
 
+    # Write obj.names
+    f_names = open(names_output, "w")
+    for class_name in classes:
+        f_names.write(class_name+"\n")
+    f_names.close()
+
     f_data = open(data_output, "w")
-    f_data.write("classes="+str(n_classes)+"\n")
+    f_data.write("classes="+str(len(classes))+"\n")
     f_data.write("train="+train_output+"\n")
     f_data.write("valid="+valid_output+"\n")
-    f_data.write("names="+names_path+"\n")
+    f_data.write("names="+names_output+"\n")
     f_data.write("backup="+backup_path+"\n")
     f_data.close()
