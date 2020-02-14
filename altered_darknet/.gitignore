@@ -8,6 +8,7 @@
 old/
 mnist/
 data/*
+!data/labels/
 !data/labels/*.png
 caffe/
 grasp/
