@@ -7,8 +7,8 @@
 *.pyc
 old/
 mnist/
-data/
-!data/labels
+data/*
+!data/labels/*.png
 caffe/
 grasp/
 images/
