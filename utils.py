@@ -5,6 +5,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import cv2, copy, urllib, time
+import fileinput
+
 from google.colab.patches import cv2_imshow
 from io import StringIO
 from io import BytesIO
@@ -468,6 +470,21 @@ def generate_yolo_train_test_files(images_dir, output_dir, classes, train_valid_
     f_data.write("backup="+backup_path+"\n")
     f_data.close()
 
-def load_classes(path):
-    f = open(path, "r")
-    return f.read().split("\n")
+def replace_class_yolo_format(original_class, replace_class, images_labels_dir, image_label_file_regex=".*.txt$"):
+    for file in os.listdir(images_labels_dir):
+        if re.match(pattern=image_label_file_regex, string=file):
+            # open file
+            f = open(os.path.join(images_labels_dir, file), "r")
+            file_content = f.read().split("\n")[:-1]
+            f.close()
+            file_output_content = []
+            for line in file_content:
+                bbox = line.split(" ")
+                if int(bbox[0]) == original_class:
+                    bbox[0] = str(replace_class)
+                file_output_content.append(" ".join(bbox))
+            f = open(os.path.join(images_labels_dir, file), "w")
+            f.write("\n".join(file_output_content))
+            f.close()
+        else:
+            continue
