@@ -467,3 +467,7 @@ def generate_yolo_train_test_files(images_dir, output_dir, classes, train_valid_
     f_data.write("names="+names_output+"\n")
     f_data.write("backup="+backup_path+"\n")
     f_data.close()
+
+def load_classes(path):
+    f = open(path, "r")
+    return f.read().split("\n")
