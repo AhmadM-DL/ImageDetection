@@ -470,6 +470,7 @@ def generate_yolo_train_test_files(images_dir, output_dir, classes, train_valid_
     f_data.write("backup="+backup_path+"\n")
     f_data.close()
 
+
 def replace_class_yolo_format(original_class, replace_class, images_labels_dir, image_label_file_regex=".*.txt$"):
     for file in os.listdir(images_labels_dir):
         if re.match(pattern=image_label_file_regex, string=file):
