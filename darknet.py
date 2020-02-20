@@ -24,7 +24,7 @@ def construct_cfg(config_file):
 
     for x in file:
         if x[0] == '[':
-            if len(network_blocks) != 0:
+            if len(network_block) != 0:
                 network_blocks.append(network_block)
                 network_block = {}
             network_block["type"] = x[1:-1].rstrip()
