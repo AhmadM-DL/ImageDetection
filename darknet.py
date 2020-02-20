@@ -31,7 +31,7 @@ def construct_cfg(config_file):
         else:
             entity, value = x.split('=')
             network_block[entity.rstrip()] = value.lstrip()
-    network_blocks.append(network_block)
+        network_blocks.append(network_block)
 
     return network_blocks
 
@@ -120,6 +120,7 @@ def construct_network_from_cfg(network_blocks):
 
 
 class DarkNet(nn.Module):
+
     def __init__(self, cfg_file):
         super(DarkNet, self).__init__()
         self.net_blocks = construct_cfg(cfg_file)
@@ -207,6 +208,8 @@ class DarkNet(nn.Module):
             return detections
         except:
             return 0
+
+    def
 
     def load_weights(self, weight_file):
 
