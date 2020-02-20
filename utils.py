@@ -1,19 +1,15 @@
-import time
 import torch
-import re, os
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import cv2, copy, urllib, time
-import fileinput
-
-from google.colab.patches import cv2_imshow
-from io import StringIO
+import os
+import re
 from io import BytesIO
-import PIL
-
-# from IPython.display import clear_output
 import IPython
+import PIL
+import copy
+import cv2
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+import time
 
 
 def boxes_iou(box1, box2):
@@ -59,7 +55,6 @@ def boxes_iou(box1, box2):
     iou = intersection_area / union_area
 
     return iou
-
 
 def nms(boxes, iou_thresh):
     # If there are no bounding boxes do nothing
@@ -149,27 +144,6 @@ def detect_objects(model, img, iou_thresh, nms_thresh, device, verbose=False, re
     if return_time:
         return boxes, detection_time, suppression_time
     return boxes
-
-
-def load_class_names(namesfile):
-    # Create an empty list to hold the object classes
-    class_names = []
-
-    # Open the file containing the COCO object classes in read-only mode
-    with open(namesfile, 'r') as fp:
-        # The coco.names file contains only one object class per line.
-        # Read the file line by line and save all the lines in a list.
-        lines = fp.readlines()
-
-    # Get the object class names
-    for line in lines:
-        # Make a copy of each line with any trailing whitespace removed
-        line = line.rstrip()
-
-        # Save the object class name into class_names
-        class_names.append(line)
-
-    return class_names
 
 
 def print_objects(boxes, class_names):
@@ -266,7 +240,7 @@ def plot_boxes(img_shape, img_axis, boxes, class_names, plot_labels, color=None)
     plt.show()
 
 
-def showarray(a, fmt='jpeg'):
+def show_array(a, fmt='jpeg'):
     """
     This function is to speed up the display of images in CoLab.
     Use 'jpeg' instead of 'png' (~5 times faster)
@@ -384,51 +358,6 @@ def annotate_frame_with_objects(original_frame, objects_bboxes, class_names, onl
             cv2_put_text(masked_frame, "{0:.2f}".format(cls_conf), int(x1), int(y2), background_color=(b, g, r), text_color=text_color)
 
     return masked_frame
-
-def load_classes(path):
-    """
-    Loads class labels at 'path'
-    """
-    fp = open(path, "r")
-    names = fp.read().split("\n")[:-1]
-    return names
-
-
-def parse_model_config(path):
-    """Parses the yolo-v3 layer configuration file and returns module definitions"""
-    file = open(path, 'r')
-    lines = file.read().split('\n')
-    lines = [x for x in lines if x and not x.startswith('#')]
-    lines = [x.rstrip().lstrip() for x in lines] # get rid of fringe whitespaces
-    module_defs = []
-    for line in lines:
-        if line.startswith('['): # This marks the start of a new block
-            module_defs.append({})
-            module_defs[-1]['type'] = line[1:-1].rstrip()
-            if module_defs[-1]['type'] == 'convolutional':
-                module_defs[-1]['batch_normalize'] = 0
-        else:
-            key, value = line.split("=")
-            value = value.strip()
-            module_defs[-1][key.rstrip()] = value.strip()
-
-    return module_defs
-
-
-def parse_data_config(path):
-    """Parses the data configuration file"""
-    options = dict()
-    options['gpus'] = '0,1,2,3'
-    options['num_workers'] = '10'
-    with open(path, 'r') as fp:
-        lines = fp.readlines()
-    for line in lines:
-        line = line.strip()
-        if line == '' or line.startswith('#'):
-            continue
-        key, value = line.split('=')
-        options[key.strip()] = value.strip()
-    return options
 
 def generate_yolo_train_test_files(images_dir, output_dir, classes, train_valid_split=0.8):
     train_output = output_dir+"/train.txt"

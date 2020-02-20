@@ -1,20 +1,11 @@
 import glob
-import random
 import os
 import numpy as np
-
 import torch
-
 from torch.utils.data import Dataset
 from PIL import Image
-import torchvision.transforms as transforms
-
-##import matplotlib.pyplot as plt
-##import matplotlib.patches as patches
-
 from skimage.transform import resize
 
-import sys
 
 class ImageFolder(Dataset):
     def __init__(self, folder_path, img_size=416):
@@ -56,9 +47,9 @@ class ListDataset(Dataset):
 
     def __getitem__(self, index):
 
-        #---------
+        # ---------
         #  Image
-        #---------
+        # ---------
 
         img_path = self.img_files[index % len(self.img_files)].rstrip()
         img = np.array(Image.open(img_path))
@@ -85,9 +76,9 @@ class ListDataset(Dataset):
         # As pytorch tensor
         input_img = torch.from_numpy(input_img).float()
 
-        #---------
+        # ---------
         #  Label
-        #---------
+        # ---------
 
         label_path = self.label_files[index % len(self.img_files)].rstrip()
 
@@ -95,10 +86,10 @@ class ListDataset(Dataset):
         if os.path.exists(label_path):
             labels = np.loadtxt(label_path).reshape(-1, 5)
             # Extract coordinates for unpadded + unscaled image
-            x1 = w * (labels[:, 1] - labels[:, 3]/2)
-            y1 = h * (labels[:, 2] - labels[:, 4]/2)
-            x2 = w * (labels[:, 1] + labels[:, 3]/2)
-            y2 = h * (labels[:, 2] + labels[:, 4]/2)
+            x1 = w * (labels[:, 1] - labels[:, 3] / 2)
+            y1 = h * (labels[:, 2] - labels[:, 4] / 2)
+            x2 = w * (labels[:, 1] + labels[:, 3] / 2)
+            y2 = h * (labels[:, 2] + labels[:, 4] / 2)
             # Adjust for added padding
             x1 += pad[1][0]
             y1 += pad[0][0]

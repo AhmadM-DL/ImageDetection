@@ -2,10 +2,21 @@
   <dictionary name="amm90">
     <words>
       <w>bboxes</w>
+      <w>bilinear</w>
       <w>boxtocv</w>
+      <w>conv</w>
+      <w>convolutional</w>
       <w>coords</w>
       <w>cuda</w>
       <w>dataloader</w>
+      <w>hyperparameters</w>
+      <w>ious</w>
+      <w>learnable</w>
+      <w>pred</w>
+      <w>pytorch</w>
+      <w>softmax</w>
+      <w>upsample</w>
+      <w>upsampling</w>
     </words>
   </dictionary>
 </component>
