@@ -6,9 +6,7 @@ import utils
 from datasets import ListDataset
 import custom_layers
 import darknet_utils
-import torch.nn.functional as F
 import cv2
-
 
 
 def construct_cfg(config_file):
@@ -133,7 +131,7 @@ class DarkNet(nn.Module):
         self.header = torch.IntTensor([0, 0, 0, 0])
         self.seen = 0
 
-    def forward(self, x):
+    def forward(self, x, CUDA):
         detections = []
         modules = self.net_blocks[1:]
         layer_outputs = {}
@@ -193,7 +191,7 @@ class DarkNet(nn.Module):
                 print("Size before transform => ", x.size())
 
                 # Convert the output to 2D (batch x grids x bounding box attributes)
-                x = transformOutput(x, inp_dim, anchors, num_classes, CUDA)
+                x = darknet_utils.transformOutput(x, inp_dim, anchors, num_classes, CUDA)
                 print("Size after transform => ", x.size())
 
                 # If no detections were made
@@ -291,7 +289,6 @@ class DarkNet(nn.Module):
                 conv_part.weight.data.copy_(conv_weight)
 
 
-
 # def compute_loss(output, target):
 #
 #     if x.is_cuda:
@@ -357,70 +354,70 @@ class DarkNet(nn.Module):
 #         precision,
 #     )
 
-def train(image_folder, model_config_path, data_config_path, weights_path, classes_path, checkpoint_dir, device,
-          batch_size=16, n_epochs=20, conf_thres=0.8, nms_thres=0.4, n_cpu=0, img_size=416, checkpoint_interval=1):
-    os.makedirs(checkpoint_dir, exist_ok=True)
-
-    classes = utils.load_classes(classes_path)
-
-    # Get data configuration
-    data_config = utils.parse_data_config(data_config_path)
-    train_path = data_config["train"]
-
-    # Get hyper parameters
-    hyperparams = utils.parse_model_config(model_config_path)[0]
-
-    learning_rate = float(hyperparams["learning_rate"])
-    momentum = float(hyperparams["momentum"])
-    decay = float(hyperparams["decay"])
-    burn_in = int(hyperparams["burn_in"])
-
-    # Initiate model
-    model = Darknet(model_config_path)
-    model.load_weights(weights_path)
-
-    model = model.to(device)
-
-    model.train()
-
-    # Get dataloader
-    dataloader = torch.utils.data.DataLoader(ListDataset(train_path), batch_size=batch_size,
-                                             shuffle=False, num_workers=n_cpu)
-
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
-
-    for epoch in range(n_epochs):
-        for batch_i, (_, imgs, targets) in enumerate(dataloader):
-            imgs = imgs.to(device)
-            targets = targets.to(device)
-
-            optimizer.zero_grad()
-
-            loss = model(imgs, targets)
-
-            loss.backward()
-            optimizer.step()
-
-            print(
-                "[Epoch %d/%d, Batch %d/%d] [Losses: x %f, y %f, w %f, h %f, conf %f, cls %f, total %f, recall: %.5f, precision: %.5f]"
-                % (
-                    epoch,
-                    n_epochs,
-                    batch_i,
-                    len(dataloader),
-                    model.losses["x"],
-                    model.losses["y"],
-                    model.losses["w"],
-                    model.losses["h"],
-                    model.losses["conf"],
-                    model.losses["cls"],
-                    loss.item(),
-                    model.losses["recall"],
-                    model.losses["precision"],
-                )
-            )
-
-            model.seen += imgs.size(0)
-
-        if epoch % opt.checkpoint_interval == 0:
-            model.save_weights("%s/%d.weights" % (opt.checkpoint_dir, epoch))
+# def train(image_folder, model_config_path, data_config_path, weights_path, classes_path, checkpoint_dir, device,
+#           batch_size=16, n_epochs=20, conf_thres=0.8, nms_thres=0.4, n_cpu=0, img_size=416, checkpoint_interval=1):
+#     os.makedirs(checkpoint_dir, exist_ok=True)
+#
+#     classes = utils.load_classes(classes_path)
+#
+#     # Get data configuration
+#     data_config = utils.parse_data_config(data_config_path)
+#     train_path = data_config["train"]
+#
+#     # Get hyper parameters
+#     hyperparams = utils.parse_model_config(model_config_path)[0]
+#
+#     learning_rate = float(hyperparams["learning_rate"])
+#     momentum = float(hyperparams["momentum"])
+#     decay = float(hyperparams["decay"])
+#     burn_in = int(hyperparams["burn_in"])
+#
+#     # Initiate model
+#     model = Darknet(model_config_path)
+#     model.load_weights(weights_path)
+#
+#     model = model.to(device)
+#
+#     model.train()
+#
+#     # Get dataloader
+#     dataloader = torch.utils.data.DataLoader(ListDataset(train_path), batch_size=batch_size,
+#                                              shuffle=False, num_workers=n_cpu)
+#
+#     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()))
+#
+#     for epoch in range(n_epochs):
+#         for batch_i, (_, imgs, targets) in enumerate(dataloader):
+#             imgs = imgs.to(device)
+#             targets = targets.to(device)
+#
+#             optimizer.zero_grad()
+#
+#             loss = model(imgs, targets)
+#
+#             loss.backward()
+#             optimizer.step()
+#
+#             print(
+#                 "[Epoch %d/%d, Batch %d/%d] [Losses: x %f, y %f, w %f, h %f, conf %f, cls %f, total %f, recall: %.5f, precision: %.5f]"
+#                 % (
+#                     epoch,
+#                     n_epochs,
+#                     batch_i,
+#                     len(dataloader),
+#                     model.losses["x"],
+#                     model.losses["y"],
+#                     model.losses["w"],
+#                     model.losses["h"],
+#                     model.losses["conf"],
+#                     model.losses["cls"],
+#                     loss.item(),
+#                     model.losses["recall"],
+#                     model.losses["precision"],
+#                 )
+#             )
+#
+#             model.seen += imgs.size(0)
+#
+#         if epoch % opt.checkpoint_interval == 0:
+#             model.save_weights("%s/%d.weights" % (opt.checkpoint_dir, epoch))
