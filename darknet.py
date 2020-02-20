@@ -91,7 +91,7 @@ def construct_network_from_cfg(network_blocks):
             if end > 0:
                 end = end - i
 
-            route = custom_layers.dummyLayer()
+            route = custom_layers.DummyLayer()
             seq_module.add_module("route_{0}".format(i), route)
             if end < 0:
                 filters = filter_tracker[i + start] + filter_tracker[i + end]
@@ -99,7 +99,7 @@ def construct_network_from_cfg(network_blocks):
                 filters = filter_tracker[i + start]
 
         elif x["type"] == "shortcut":
-            shortcut = custom_layers.dummyLayer()
+            shortcut = custom_layers.DummyLayer()
             seq_module.add_module("shortcut_{0}".format(i), shortcut)
 
         elif x["type"] == "yolo":
@@ -109,9 +109,9 @@ def construct_network_from_cfg(network_blocks):
             masks = [int(a) for a in masks]
             anchors = [(anchors[j], anchors[j + 1]) for j in range(0, len(anchors), 2)]
             anchors = [anchors[j] for j in masks]
-            detectorLayer = custom_layers.detector(anchors)
+            detector_layer = custom_layers.Detector(anchors)
 
-            seq_module.add_module("Detection_{0}".format(i), detectorLayer)
+            seq_module.add_module("Detection_{0}".format(i), detector_layer)
 
         modules.append(seq_module)
         channels = filters
