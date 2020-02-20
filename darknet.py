@@ -31,7 +31,7 @@ def construct_cfg(config_file):
         else:
             entity, value = x.split('=')
             network_block[entity.rstrip()] = value.lstrip()
-        network_blocks.append(network_block)
+    network_blocks.append(network_block)
 
     return network_blocks
 
