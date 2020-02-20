@@ -222,7 +222,7 @@ def write_results(prediction, confidence, num_classes, nms=True, nms_conf=0.4):
     return output
 
 
-def write(x, batches, classes, results, colors):
+def write(x, classes, results, colors):
     c1 = tuple(x[1:3].int())
     c2 = tuple(x[3:5].int())
     img = results[int(x[0])]
