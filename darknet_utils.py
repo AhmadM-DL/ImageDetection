@@ -52,13 +52,14 @@ def bbox_iou(box1, box2):
 
 
 def transform_output(prediction, inp_dim, anchors, num_classes, CUDA=True):
-    batch_size = prediction.size(0)
-    stride = inp_dim // prediction.size(2)
-    grid_size = inp_dim // stride
+    #  1, 255, 8, 8
+    batch_size = prediction.size(0)  # 1
+    stride = inp_dim // prediction.size(2)  # 416 // 8 -> 52
+    grid_size = inp_dim // stride  # 416 // 52 -> 8
     bbox_attrs = 5 + num_classes
     num_anchors = len(anchors)
 
-    anchors = [(a[0] / stride, a[1] / stride) for a in anchors]
+    anchors = [(a[0] / stride, a[1] / stride) for a in anchors]  # (10/52, 13/52)
 
     prediction = prediction.view(batch_size, bbox_attrs * num_anchors, grid_size * grid_size)
     prediction = prediction.transpose(1, 2).contiguous()

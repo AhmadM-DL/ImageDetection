@@ -177,6 +177,7 @@ class DarkNet(nn.Module):
             elif module_type == 'yolo':
 
                 anchors = self.module_list[i][0].anchors
+
                 # Get the input dimensions
                 inp_dim = int(self.network_hyperparameters["height"])
 
@@ -188,7 +189,7 @@ class DarkNet(nn.Module):
                 print("Size before transform => ", x.size())
 
                 # Convert the output to 2D (batch x grids x bounding box attributes)
-                x = darknet_utils.transform_output(x, inp_dim, anchors, num_classes, CUDA)
+                #x = darknet_utils.transform_output(x, inp_dim, anchors, num_classes, CUDA)
                 print("Size after transform => ", x.size())
 
                 # If no detections were made
