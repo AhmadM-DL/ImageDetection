@@ -142,7 +142,7 @@ class DarkNet(nn.Module):
             # Upsampling is basically a form of convolution
             if module_type == "convolutional" or module_type == "upsample":
 
-                x = self.moduleList[i](x)
+                x = self.module_list[i](x)
                 layer_outputs[i] = x
 
             # Add outouts from previous layers to this layer
@@ -176,7 +176,7 @@ class DarkNet(nn.Module):
 
             elif module_type == 'yolo':
 
-                anchors = self.moduleList[i][0].anchors
+                anchors = self.module_list[i][0].anchors
                 # Get the input dimensions
                 inp_dim = int(self.DNInfo["height"])
 
@@ -188,7 +188,7 @@ class DarkNet(nn.Module):
                 print("Size before transform => ", x.size())
 
                 # Convert the output to 2D (batch x grids x bounding box attributes)
-                x = darknet_utils.transformOutput(x, inp_dim, anchors, num_classes, CUDA)
+                x = darknet_utils.transform_output(x, inp_dim, anchors, num_classes, CUDA)
                 print("Size after transform => ", x.size())
 
                 # If no detections were made
@@ -226,11 +226,11 @@ class DarkNet(nn.Module):
         weights = np.fromfile(fp, dtype=np.float32)
 
         tracker = 0
-        for i in range(len(self.moduleList)):
+        for i in range(len(self.module_list)):
             module_type = self.netBlocks[i + 1]["type"]
 
             if module_type == "convolutional":
-                model = self.moduleList[i]
+                model = self.module_list[i]
                 try:
                     batch_normalize = int(self.netBlocks[i + 1]["batch_normalize"])
                 except:
