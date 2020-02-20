@@ -227,12 +227,12 @@ class DarkNet(nn.Module):
 
         tracker = 0
         for i in range(len(self.module_list)):
-            module_type = self.netBlocks[i + 1]["type"]
+            module_type = self.net_blocks[i + 1]["type"]
 
             if module_type == "convolutional":
                 model = self.module_list[i]
                 try:
-                    batch_normalize = int(self.netBlocks[i + 1]["batch_normalize"])
+                    batch_normalize = int(self.net_blocks[i + 1]["batch_normalize"])
                 except:
                     batch_normalize = 0
 
