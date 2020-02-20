@@ -126,6 +126,7 @@ class DarkNet(nn.Module):
         self.net_blocks = construct_cfg(cfg_file)
         self.network_hyperparameters, self.module_list = construct_network_from_cfg(self.net_blocks)
         self.header = torch.IntTensor([0, 0, 0, 0])
+        self.layer_outputs = {}
         self.seen = 0
 
     def forward(self, x, CUDA):
@@ -143,7 +144,7 @@ class DarkNet(nn.Module):
             if module_type == "convolutional" or module_type == "upsample":
 
                 x = self.module_list[i](x)
-                layer_outputs[i] = x
+                self.layer_outputs[i] = x
 
             # Add outouts from previous layers to this layer
             elif module_type == "route":
@@ -155,29 +156,28 @@ class DarkNet(nn.Module):
                     layers[0] = layers[0] - i
 
                 if len(layers) == 1:
-                    x = layer_outputs[i + (layers[0])]
+                    x = self.layer_outputs[i + (layers[0])]
 
                 else:
                     # If layer number is mentioned instead of its position relative to the the current layer
                     if (layers[1]) > 0:
                         layers[1] = layers[1] - i
 
-                    map1 = layer_outputs[i + layers[0]]
-                    map2 = layer_outputs[i + layers[1]]
+                    map1 = self.layer_outputs[i + layers[0]]
+                    map2 = self.layer_outputs[i + layers[1]]
 
                     x = torch.cat((map1, map2), 1)
-                layer_outputs[i] = x
+                self.layer_outputs[i] = x
 
             # ShortCut is essentially residue from resnets
             elif module_type == "shortcut":
                 from_ = int(modules[i]["from"])
-                x = layer_outputs[i - 1] + layer_outputs[i + from_]
-                layer_outputs[i] = x
+                x = self.layer_outputs[i - 1] + self.layer_outputs[i + from_]
+                self.layer_outputs[i] = x
 
             elif module_type == 'yolo':
 
                 anchors = self.module_list[i][0].anchors
-
                 # Get the input dimensions
                 inp_dim = int(self.network_hyperparameters["height"])
 
@@ -189,7 +189,7 @@ class DarkNet(nn.Module):
                 print("Size before transform => ", x.size())
 
                 # Convert the output to 2D (batch x grids x bounding box attributes)
-                #x = darknet_utils.transform_output(x, inp_dim, anchors, num_classes, CUDA)
+                x = darknet_utils.transform_output(x, inp_dim, anchors, num_classes, CUDA)
                 print("Size after transform => ", x.size())
 
                 # If no detections were made
@@ -203,7 +203,7 @@ class DarkNet(nn.Module):
                 else:
                     detections = torch.cat((detections, x), 1)
 
-                layer_outputs[i] = layer_outputs[i - 1]
+                self.layer_outputs[i] = self.layer_outputs[i - 1]
 
         try:
             return detections
