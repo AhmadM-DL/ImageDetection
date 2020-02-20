@@ -209,8 +209,6 @@ class DarkNet(nn.Module):
         except:
             return 0
 
-    def
-
     def load_weights(self, weight_file):
 
         fp = open(weight_file, "rb")
