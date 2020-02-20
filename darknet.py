@@ -1,12 +1,8 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import os
-import utils
-from datasets import ListDataset
 import custom_layers
 import darknet_utils
-import cv2
 
 
 def construct_cfg(config_file):
@@ -127,7 +123,7 @@ class DarkNet(nn.Module):
     def __init__(self, cfg_file):
         super(DarkNet, self).__init__()
         self.net_blocks = construct_cfg(cfg_file)
-        self.network_hyperparameters, self.module_list = construct_network_from_cfg(self.netBlocks)
+        self.network_hyperparameters, self.module_list = construct_network_from_cfg(self.net_blocks)
         self.header = torch.IntTensor([0, 0, 0, 0])
         self.seen = 0
 
@@ -421,3 +417,4 @@ class DarkNet(nn.Module):
 #
 #         if epoch % opt.checkpoint_interval == 0:
 #             model.save_weights("%s/%d.weights" % (opt.checkpoint_dir, epoch))
+
